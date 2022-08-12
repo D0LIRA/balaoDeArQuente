@@ -18,6 +18,7 @@ var gameOver;
 var gameOverImg;
 var restart;
 var restartImg;
+var score_count = 0;
 
 function preload(){
 bgImg = loadImage("assets/bg.png")
@@ -62,6 +63,7 @@ balloon.scale = 0.15;
 
 bottomObsGroup = new Group();
 topObsGroup = new Group();
+barGroup = new Group();
 
 gameOver = createSprite(200,150);
 gameOver.addImage(gameOverImg);
@@ -69,12 +71,14 @@ restart = createSprite(200,250);
 restart.addImage(restartImg);
 restart.scale = 0.9;
 
+
 }
 
 function draw() {
   
   background("black");
   
+
   if(gameState == PLAY){
 
     restart.visible = false;
@@ -88,6 +92,7 @@ function draw() {
 
     spawnObstaclesBottom();  
     spawnObstaclesTop()
+    score_bar();
 
     if(balloon.isTouching(topGround) || balloon.isTouching(bottomGround) || 
        topObsGroup.isTouching(balloon) || bottomObsGroup.isTouching(balloon)){
@@ -107,6 +112,11 @@ function draw() {
     topObsGroup.setVelocityXEach(-1);
     bottomObsGroup.setVelocityXEach(0);
     topObsGroup.setLifetimeEach(550);
+
+    if(mousePressedOver(restart)){
+      restart_game()
+    }
+    
   }
     //fazendo o balão de ar quente pular
   
@@ -118,16 +128,18 @@ function draw() {
    
   balloon.collide(bottomGround); 
   drawSprites();
-
+  score();
   console.log(gameState); 
+
+  
 }
 
 function spawnObstaclesBottom(){
   if(frameCount%110 == 0){
-    obsBottom = createSprite(420,337,1,1)
+    obsBottom = createSprite(420,340,1,1)
     obsBottom.addImage(red_build);
     obsBottom.velocityX = -2;
-    obsBottom.scale = 0.07;
+    obsBottom.scale = 0.067;
     balloon.depth+=1
     obsBottom.lifetime = 230;
     var rand = round(random(1,3))
@@ -143,6 +155,7 @@ function spawnObstaclesBottom(){
     }
     bottomObsGroup.add(obsBottom);
   }
+  
 }
 
 function spawnObstaclesTop(){
@@ -164,4 +177,39 @@ function spawnObstaclesTop(){
     }
     topObsGroup.add(obsTop);
   }
+
+  
+}
+
+function score_bar(){
+  if(frameCount%50 == 0){
+    var bar = createSprite(400,200,10,400)
+    bar.velocityX = -50;
+    bar.visible = false;
+    bar.lifetime = 200
+    barGroup.add(bar);
+  }
+  
+}
+
+function score(){
+  if(balloon.isTouching(barGroup)){
+    score_count = score_count+50;
+  }
+
+  fill("#483D8B");
+  textFont("Segoe UI Black");
+  textSize(20);
+  text("score: " + score_count, 280,50);
+  
+}
+
+function restart_game(){
+  gameState = PLAY;
+  score_count = 0;
+  gameOver.visible = false;
+  restart.visible = false;
+  topObsGroup.destroyEach();
+  bottomObsGroup.destroyEach();
+  balloon.y = 100;
 }
